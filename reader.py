@@ -1,12 +1,14 @@
 import pickle
+from model import game_state_to_data_sample
+
 
 objects = []
-with (open("gamin archive/2024-12-03_08_34_59.pickle", "rb")) as openfile:
+with (open("gamin archive/ballin.pickle", "rb")) as openfile:
     while True:
         try:
             objects.append(pickle.load(openfile))
         except EOFError:
             break
 
-for element in objects:
-    print(element)
+print(len(objects[0]["data"]))
+
