@@ -5,8 +5,9 @@ import pygame
 import time
 
 from food import Food
-from model import game_state_to_data_sample
+from model import game_state_to_data_sample ,prepare_samples, OneVsRestSVM
 from snake import Snake, Direction
+
 
 
 def main():
@@ -19,12 +20,13 @@ def main():
     snake = Snake(block_size, bounds)
     food = Food(block_size, bounds, lifetime=100)
 
-    agent = HumanAgent(block_size, bounds)  # Once your agent is good to go, change this line
+    # agent = HumanAgent(block_size, bounds)  # Once your agent is good to go, change this line
+    agent = BehavioralCloningAgent(block_size, bounds)
     scores = []
     run = True
     pygame.time.delay(1000)
     while run:
-        pygame.time.delay(90)  # Adjust game speed, decrease to test your agent and model quickly
+        pygame.time.delay(15)  # Adjust game speed, decrease to test your agent and model quickly
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -32,7 +34,8 @@ def main():
 
         game_state = {"food": (food.x, food.y),
                       "snake_body": snake.body,  # The last element is snake's head
-                      "snake_direction": snake.direction}
+                      "snake_direction": snake.direction,
+                      }
 
         direction = agent.act(game_state)
         snake.turn(direction)
@@ -54,13 +57,12 @@ def main():
         pygame.display.update()
 
     print(f"Scores: {scores}")
+    print(sum(scores)/len(scores))
     agent.dump_data()
     pygame.quit()
 
 
 class HumanAgent:
-    """ In every timestep every agent should perform an action (return direction) based on the game state. Please note, that
-    human agent should be the only one using the keyboard and dumping data. """
     def __init__(self, block_size, bounds):
         self.block_size = block_size
         self.bounds = bounds
@@ -91,13 +93,18 @@ class HumanAgent:
 
 
 class BehavioralCloningAgent:
-    def __init__(self):
-        raise NotImplementedError()
+    def __init__(self, block_size, bounds):
+        self.block_size = block_size
+        self.bounds = bounds
+        self.model = OneVsRestSVM()
+        a, b = prepare_samples("gamin archive/circles.pickle")
+        self.model.train(a, b)
 
     def act(self, game_state) -> Direction:
-        """ Calculate data sample attributes from game_state and run the trained model to predict snake's action/direction"""
-        data_sample = game_state_to_data_sample(game_state)
-        raise NotImplementedError()
+        sample = game_state_to_data_sample(game_state, self.block_size, self.bounds)
+        choice = self.model.predict(sample)
+        print(choice)
+        return Direction(choice)
 
     def dump_data(self):
         pass
@@ -105,4 +112,3 @@ class BehavioralCloningAgent:
 
 if __name__ == "__main__":
     main()
-
