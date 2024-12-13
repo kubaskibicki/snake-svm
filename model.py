@@ -1,5 +1,7 @@
 import pickle
 
+from sympy.matrices.expressions.blockmatrix import bounds
+
 from snake import Direction
 import numpy as np
 
@@ -11,20 +13,13 @@ def game_state_to_data_sample(game_state: dict, block_size: int, bounds: tuple):
     direction = game_state["snake_direction"]
     output = [
         # Obstacles
-        # Obstacle/body to the left
-        ((snake_head[0] - block_size, snake_head[1]) in snake_body or snake_head[0] == 0),
-        # Obstacle/body to the right
-        ((snake_head[0] + block_size, snake_head[1]) in snake_body or snake_head[0] + block_size == bounds[0]),  # obstacle E
-        # Obstacle/body overhead
-        ((snake_head[0], snake_head[1] - block_size) in snake_body or snake_head[1] == 0),  # obstacle N
-        # Obstacle/body below head
-        ((snake_head[0], snake_head[1] + block_size) in snake_body or snake_head[1] + block_size == bounds[1]),  # obstacle S
+        snake_head[1] + block_size == bounds[1], # obstacle below head,
+        snake_head[0] + block_size == bounds[0],  # bottom right corner
+        snake_head[1] == 0,  # obstacle N
+        snake_head[0] == 0 and snake_head[1] == 0,  # top left corner
         # Food in same axis
         # Food in same x
         snake_head[0] == food[0],
-        # Food in same y
-        snake_head[1]  == food[1],
-        # Current direction
         # Going left
         direction.value == Direction.LEFT.value,
         # Going right

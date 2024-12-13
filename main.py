@@ -26,7 +26,7 @@ def main():
     run = True
     pygame.time.delay(1000)
     while run:
-        pygame.time.delay(15)  # Adjust game speed, decrease to test your agent and model quickly
+        pygame.time.delay(20)  # Adjust game speed, decrease to test your agent and model quickly
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -48,6 +48,10 @@ def main():
             pygame.display.update()
             pygame.time.delay(300)
             scores.append(snake.length - 3)
+            if len(scores) == 30:
+                print(f"Scores: {scores}")
+                print(sum(scores) / len(scores))
+                raise NotImplementedError
             snake.respawn()
             food.respawn()
 
@@ -96,7 +100,7 @@ class BehavioralCloningAgent:
     def __init__(self, block_size, bounds):
         self.block_size = block_size
         self.bounds = bounds
-        self.model = OneVsRestSVM()
+        self.model = OneVsRestSVM(0.01, 0.01, 3000)
         a, b = prepare_samples("gamin archive/circles.pickle")
         self.model.train(a, b)
 
