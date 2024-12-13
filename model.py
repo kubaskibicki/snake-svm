@@ -1,6 +1,5 @@
 import pickle
 
-from sympy.matrices.expressions.blockmatrix import bounds
 
 from snake import Direction
 import numpy as np
@@ -105,23 +104,30 @@ class OneVsRestSVM:
 
 
     def predict(self, x):
-        print("here")
         best_value = float("-inf")
         best_direction = None
         for value, model in self.all_models.items():
             result = model.predict(x)
-            print(result)
             if result > best_value:
                 best_value = result
                 best_direction = value
         return best_direction
 
+    def save(self, filename):
+        with open(f"models/{filename}.pickle", 'wb') as f:
+            pickle.dump(self.all_models, f)
+
+    def load(self, filename):
+        with open(f"models/{filename}.pickle", 'rb') as f:
+            self.all_models = pickle.load(f)
+
+
 def main():
     pass
 
 if __name__ == "__main__":
-    svm = OneVsRestSVM(.005, .0001, 300)
-    a, b = prepare_samples("gamin archive/2024-12-03_09_05_12.pickle")
+    svm = OneVsRestSVM(0.01, 0.01, 3000)
+    a, b = prepare_samples("gamin archive/circles.pickle")
     svm.train(a, b)
-    main()
+    svm.save("circ")
 

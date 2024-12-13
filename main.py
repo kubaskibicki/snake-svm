@@ -5,7 +5,7 @@ import pygame
 import time
 
 from food import Food
-from model import game_state_to_data_sample ,prepare_samples, OneVsRestSVM
+from model import game_state_to_data_sample ,prepare_samples, OneVsRestSVM, SVM
 from snake import Snake, Direction
 
 
@@ -21,12 +21,12 @@ def main():
     food = Food(block_size, bounds, lifetime=100)
 
     # agent = HumanAgent(block_size, bounds)  # Once your agent is good to go, change this line
-    agent = BehavioralCloningAgent(block_size, bounds)
+    agent = BehavioralCloningAgent(block_size, bounds, "ih")
     scores = []
     run = True
     pygame.time.delay(1000)
     while run:
-        pygame.time.delay(20)  # Adjust game speed, decrease to test your agent and model quickly
+        pygame.time.delay(10)  # Adjust game speed, decrease to test your agent and model quickly
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -48,6 +48,7 @@ def main():
             pygame.display.update()
             pygame.time.delay(300)
             scores.append(snake.length - 3)
+            print(len(scores))
             if len(scores) == 30:
                 print(f"Scores: {scores}")
                 print(sum(scores) / len(scores))
@@ -97,12 +98,13 @@ class HumanAgent:
 
 
 class BehavioralCloningAgent:
-    def __init__(self, block_size, bounds):
+    def __init__(self, block_size, bounds, name):
         self.block_size = block_size
         self.bounds = bounds
         self.model = OneVsRestSVM(0.01, 0.01, 3000)
-        a, b = prepare_samples("gamin archive/circles.pickle")
-        self.model.train(a, b)
+        # a, b = prepare_samples("gamin archive/circles.pickle")
+        # self.model.train(a, b)
+        self.model.load("circ")
 
     def act(self, game_state) -> Direction:
         sample = game_state_to_data_sample(game_state, self.block_size, self.bounds)
